@@ -1,0 +1,36 @@
+# Archivos de compilación
+bin/
+obj/
+
+# Configuración de usuario (no compartir)
+*.user
+*.rsuser
+*.suo
+
+# Logs
+*.log
+
+# Archivos temporales
+*.tmp
+*.temp
+
+# VS Code / Visual Studio
+.vscode/
+.vs/
+
+# Configuración local de dependencias
+project.lock.json
+project.fragment.lock.json
+
+# Archivos generados por el runtime
+*.dbmdl
+*.bak
+*.ldf
+*.mdf
+
+# Publicaciones
+*.publish.xml
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
