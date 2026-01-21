@@ -6,43 +6,61 @@ using System.Threading.Tasks;
 
 namespace BibliotecaDigital
 {
-    public class Libro
+    public class Libro(string bookName, string authorName)
     {
-        public string Title { get; set; }
-        public string Author { get; set; }
-        public string PublicatedAt { get; set; }
-        public bool State { get; set; } = true;
+        private string _bookName = bookName;
+        private string _author = authorName;
+        private bool _available = true;
+        private Usuario? _atualHolder = null;
 
-        public Libro(string title, string author, string publicatedAt, bool state)
+        public void GiveBook(Usuario usuario)
         {
-            Title = title;
-            Author = author;
-            PublicatedAt = publicatedAt;
+            if (_available == false) 
+            {
+                Console.WriteLine("Este libro ya esta prestado");
+                return;
+            }
+
+            if (usuario.IsHolder) 
+            {
+                Console.WriteLine("El usuario ya el poseedor de un libro...");
+                return;
+            }
+
+            _atualHolder = usuario;
+            _available = false;
+            usuario.IsHolder = true;
+
+            Console.WriteLine($"El nuevo poseedor es {_atualHolder.Name} y el estado del libro cambio a {_available}");
         }
 
         public void ReturnBook()
         {
-            if (State == false)
+            if (_available) 
             {
-                State = true;
-                Console.WriteLine("El Libro fue devuelto a la biblioteca");
+                Console.WriteLine("Este libro ya esta en la biblioteca");
+                return;
             }
-            else
+
+            if (_atualHolder == null)
             {
-                Console.WriteLine("El Libro ya esta en la biblioteca");
+                Console.WriteLine("Este libro ya esta en la biblioteca");
+                return;
             }
+
+            _atualHolder.IsHolder = false;
+            _available = true;
+            _atualHolder = null;
+
+            Console.WriteLine($"El libro nuevamente es en la biblioteca y el estado del libro cambio a {_available}");
         }
 
-        public void GiveBook()
+        public void GetInfo()
         {
-            if (State == true)
-            {
-                State = false;
-                Console.WriteLine($"El Libro fue prestado");
-            }else
-            {
-                Console.WriteLine("El libro ya esta siendo usado por otra persona...");
-            }
+            Console.WriteLine("\nNombre del Libro: " + _bookName);
+            Console.WriteLine("Autor: " + _author);
+            Console.WriteLine("Estado del libro: " + (_available ? "Disponible" : "Prestado"));
+            Console.WriteLine("Actual poseedor: " + (_available ? "Biblioteca" : _atualHolder.Name));
         }
     }
 }

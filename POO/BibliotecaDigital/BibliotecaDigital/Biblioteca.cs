@@ -8,18 +8,32 @@ namespace BibliotecaDigital
 {
     internal class Biblioteca
     {
-        private List<Libro> libros = new List<Libro> ();
-        
-        public void AddBook (Libro libro)
+        private List<Libro> biblioteca = new List<Libro>();
+
+        public void AddBook(Libro book)
         {
-            libros.Add (libro);
+            biblioteca.Add(book);
+            Console.WriteLine("El libro se añadio correctamente!");
         }
 
-        public void ListBooks()
+        public void RemoveBook(Libro book) 
         {
-            foreach (var libro in libros)
+            if(!biblioteca.Contains(book))
             {
-                Console.WriteLine($"{libro.Title} - {(libro.State == true ? "Disponible" : "En Uso...")}");
+                Console.WriteLine("El libro no esta en la biblioteca...");
+                return;
+            }
+
+            biblioteca.Remove(book);
+        }
+
+        public void GetAllBooks()
+        {
+            if(biblioteca.Count == 0) { return; }
+
+            foreach (var book in biblioteca)
+            {
+                book.GetInfo();
             }
         }
     }
