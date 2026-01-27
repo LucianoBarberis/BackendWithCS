@@ -9,7 +9,7 @@ namespace PruebaAPI2.Controllers
     [ApiController]
     public class Biblioteca : ControllerBase
     {
-        private static BibliotecaModel _biblioteca = new BibliotecaModel();
+        private BibliotecaModel _biblioteca = new BibliotecaModel();
 
         [HttpPost]
         public IActionResult AddLibro([FromBody] Libro libro)
@@ -18,9 +18,13 @@ namespace PruebaAPI2.Controllers
         }
 
         [HttpGet]
-        public List<Libro> GetLibro()
+        public IActionResult GetLibro()
         {
-            return _biblioteca.Libros;
+            if(_biblioteca.Libros.Count == 0)
+            {
+                return NotFound("No hay libros en la biblioteca");
+            }
+            return Ok(_biblioteca.Libros);
         }
 
         [HttpGet("{id}")]
@@ -43,7 +47,7 @@ namespace PruebaAPI2.Controllers
                 return NotFound("Libro no encontrado");
             }
             _biblioteca.Libros.Remove(libro);
-            return Ok("Libro eliminado correctamente");
+            return NoContent();
         }
 
         [HttpPut("{id}")]
@@ -57,7 +61,7 @@ namespace PruebaAPI2.Controllers
             libro.Titulo = updatedLibro.Titulo;
             libro.Autor = updatedLibro.Autor;
             libro.publicacion = updatedLibro.publicacion;
-            return Ok("Libro actualizado correctamente");
+            return NoContent();
         }
     }
 }
