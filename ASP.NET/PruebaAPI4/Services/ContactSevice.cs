@@ -1,32 +1,39 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PruebaAPI4.Data;
 using PruebaAPI4.DTOs;
 using PruebaAPI4.Models;
+using PruebaAPI4.Repository;
+using PruebaAPI4.Validations;
 
 namespace PruebaAPI4.Services
 {
     public class ContactSevice : IContactService
     {
-        private AgendaContext _context;
-        public ContactSevice(AgendaContext context)
+
+
+        private IRepository<Contacto> _contactRepository;
+
+        public ContactSevice(IRepository<Contacto> repository)
         {
-            _context = context;
+            _contactRepository = repository;
         }
         public async Task<IEnumerable<ContactoReadDto>> GetAllContacts()
         {
-            return await _context.Contactos.Select(c => new ContactoReadDto
+            var contacts = await _contactRepository.Get();
+            return contacts.Select(contact => new ContactoReadDto
             {
-                ContactId = c.ContactId,
-                Email = c.Mail,
-                Name = c.Name,
-                Phone = c.Phone
-            }).ToListAsync();
+                Name = contact.Name,
+                Email = contact.Mail,
+                Phone = contact.Phone,
+                ContactId = contact.ContactId,
+            });
         }
         public async Task<ContactoReadDto> GetContactById(int id) 
         {
-            var contacto = await _context.Contactos.FindAsync(id);
+            var contacto = await _contactRepository.GetById(id);
             if (contacto == null) 
             {
                 return null;
@@ -49,8 +56,8 @@ namespace PruebaAPI4.Services
                 Name = contacto.Name,
                 Phone = contacto.Phone
             };
-            await _context.Contactos.AddAsync(newContact);
-            await _context.SaveChangesAsync();
+            await _contactRepository.Add(newContact);
+            await _contactRepository.Save();
 
             var ContactoDto = new ContactoReadDto
             {
@@ -65,7 +72,7 @@ namespace PruebaAPI4.Services
 
         public async Task<ContactoReadDto> UpdateContact(ContactoUpdateDto DataToUpdate, int id)
         {
-            var contacto = await _context.Contactos.FindAsync(id);
+            var contacto = await _contactRepository.GetById(id);
             if (contacto == null)
             {
                 return null;
@@ -74,7 +81,8 @@ namespace PruebaAPI4.Services
             contacto.Phone = DataToUpdate.Phone;
             contacto.Name = DataToUpdate.Name;
             contacto.Mail = DataToUpdate.Email;
-            await _context.SaveChangesAsync();
+            _contactRepository.Update(contacto);
+            await _contactRepository.Save();
 
             return new ContactoReadDto 
             {
@@ -87,14 +95,14 @@ namespace PruebaAPI4.Services
 
         public async Task<Contacto> DeleteContact(int id)
         {
-            var ContactToDelete = await _context.Contactos.FindAsync(id);
+            var ContactToDelete = await _contactRepository.GetById(id);
             if (ContactToDelete == null) 
             {
                 return null;
             }
 
-            _context.Contactos.Remove(ContactToDelete);
-            await _context.SaveChangesAsync();
+            _contactRepository.Delete(ContactToDelete);
+            await _contactRepository.Save();
 
             return ContactToDelete;
         }

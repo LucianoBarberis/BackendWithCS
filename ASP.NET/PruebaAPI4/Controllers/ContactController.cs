@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FluentValidation;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using PruebaAPI4.DTOs;
 using PruebaAPI4.Services;
+using System.ComponentModel.DataAnnotations;
 
 namespace PruebaAPI4.Controllers
 {
@@ -10,9 +12,15 @@ namespace PruebaAPI4.Controllers
     public class ContactController : ControllerBase
     {
         private IContactService _contactService;
-        public ContactController (IContactService contactService)
+        private IValidator<ContactoUpdateDto> _validatorUpdate;
+        private IValidator<ContactoCreateDto> _validatorAdd;
+        public ContactController (IContactService contactService, 
+                                  IValidator<ContactoCreateDto> validatorAdd,
+                                  IValidator<ContactoUpdateDto> validatorUpdate)
         {
             _contactService = contactService;
+            _validatorAdd = validatorAdd;
+            _validatorUpdate = validatorUpdate;
         }
 
         [HttpGet]
@@ -32,15 +40,29 @@ namespace PruebaAPI4.Controllers
         [HttpPost]
         public async Task<ActionResult<ContactoCreateDto>> AddContacto(ContactoCreateDto contacto)
         {
+            var validationResult = _validatorAdd.Validate(contacto);
+
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.Errors);
+            }
+
             var newContact = await _contactService.AddContact(contacto);
+
             return CreatedAtAction(nameof(GetById), new { id = newContact.ContactId }, newContact);
         }
 
         [HttpPut("{id}")]
         public async Task<ActionResult<ContactoReadDto>> UpdateContacto([FromBody] ContactoUpdateDto contacto, int id) 
         {
+            var validationResult = _validatorUpdate.Validate(contacto);
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.Errors);
+            }
+
             var contactUpdated = await _contactService.UpdateContact(contacto, id);
-            if(contactUpdated == null) {  return NotFound(); }
+            
             return Ok(contactUpdated);
         }
 
